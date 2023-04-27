@@ -6,9 +6,9 @@ namespace FileData.DAO;
 
 public class PostFileDao : IPostDao
 {
-    private readonly ForumContext context;
+    private readonly RedditContext context;
 
-    public PostFileDao(ForumContext context)
+    public PostFileDao(RedditContext context)
     {
         this.context = context;
     }

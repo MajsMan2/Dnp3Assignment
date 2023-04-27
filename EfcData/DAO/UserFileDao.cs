@@ -6,9 +6,9 @@ namespace FileData.DAO;
 
 public class UserFileDao : IUserDao
 {
-    private readonly ForumContext context;
+    private readonly RedditContext context;
 
-    public UserFileDao(ForumContext context)
+    public UserFileDao(RedditContext context)
     {
         this.context = context;
     }
