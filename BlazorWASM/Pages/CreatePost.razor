@@ -1,0 +1,105 @@
+﻿@page "/CreatePost"
+@using LoginFuncProject.Models
+@using LoginFuncProject.Dtos
+@using HttpClients.ClientInterfaces
+@inject IUserService userService
+@inject IPostService postService
+@inject NavigationManager navMgr
+
+<div class="card">
+    @if (users == null)
+    {
+        <label>Loading users...</label>
+    }
+    else if (!users.Any())
+    {
+        <label>No users found</label>
+    }
+    else
+    {
+        <h3>Create Post</h3>
+        <div class="form-group field">
+            <label>Title:</label>
+            <input type="text" @bind="postTitle"/>
+        </div>
+        <div class="form-group field">
+            <label>Text:</label>
+            <input type="text" @bind="newText"/>
+        </div>
+        <div class="form-group field">
+            <label>Assignee:</label>
+            <select @bind="selectedUserId">
+                <option>Choose</option>
+                @foreach (User user in users)
+                {
+                    <option value="@user.Id">@user.UserName</option>
+                }
+            </select>
+        </div>
+        <div class="button-row">
+            @if (!string.IsNullOrEmpty(msg))
+            {
+                <label style="color: red">@msg</label>
+            }
+            <button @onclick="Create" class="acceptbtn">Create</button>
+        </div>
+    }
+</div>
+
+@code {
+    private IList<User> users;
+    private int? selectedUserId;
+    private string postTitle = "";
+    private string newText = "";
+
+    private string msg = "";
+
+    private bool showModal;
+
+    protected override async Task OnInitializedAsync()
+    {
+        msg = "";
+        try
+        {
+            users = (IList<User>) await userService.GetUsers();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+        }
+    }
+
+    private async Task Create()
+    {
+        msg = "";
+        if (selectedUserId == null)
+        {
+            msg = "You must select an assignee!";
+            return;
+        }
+        if (string.IsNullOrEmpty(postTitle))
+        {
+            msg = "Title cannot be empty!";
+            return;
+        }
+
+        try
+        {
+            PostCreationDto dto = new((int)selectedUserId, postTitle, newText);
+            await postService.CreateAsync(dto);
+            showModal = true;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+        }
+    }
+
+    private void Proceed()
+    {
+        showModal = false;
+        navMgr.NavigateTo("/ViewPosts");
+    }
+}

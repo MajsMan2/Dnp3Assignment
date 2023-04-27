@@ -1,0 +1,15 @@
+﻿@page "/post"
+@page "/post/{id:int}"
+@using HttpClients.ClientInterfaces
+@inject IPostService PostService
+@inject NavigationManager NavMan
+
+<h3>See your post</h3>
+
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+    
+   // LoginFuncProject.Models.Post? post = new LoginFuncProject.Models.Post{Id = 1}
+}

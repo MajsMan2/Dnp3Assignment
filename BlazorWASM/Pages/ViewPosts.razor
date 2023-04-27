@@ -1,0 +1,44 @@
+﻿@page "/ViewPosts"
+@using BlazorWasm1.Services.PostService
+@inject IPostServices PostService 
+@inject NavigationManager NavMan
+
+<h3>Posts</h3>
+
+<table class=table>
+    <thead>
+    <tr>
+        <th>Title</th>
+        <th>Text</th>
+        <th>Id</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var post in PostService.Posts)
+    {
+        <tr>
+            <td>@post.Title</td>
+            <td>@post.NewText</td>
+            <td>@post.Id</td>
+            <td>
+                <button class="bt btn-primary"
+                        @OnClick="(()=> ShowPost(post.Id))">
+                    <i class="oi oi-pencil"></i>
+                    </button>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await PostService.GetPost();
+    }
+
+    void ShowPost(int id)
+    {
+        NavMan.NavigateTo($"posts/{id}");
+    }
+}
