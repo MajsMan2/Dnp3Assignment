@@ -9,12 +9,15 @@ public class UserCreationDto
     public string Email { get; }
     
     public int Karma { get; }
+    
+    public int Id { get; }
 
-    public UserCreationDto(string userName, string password, string email, int karma)
+    public UserCreationDto(string userName, string password, string email, int karma, int id)
     {
         UserName = userName;
         Password = password;
         Email = email;
-        Karma = karma;
+        Karma = 0;
+        Id = id;
     }
 }

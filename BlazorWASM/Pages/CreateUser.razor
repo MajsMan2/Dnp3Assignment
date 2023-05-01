@@ -40,6 +40,7 @@
     private string password = "";
     private string email = "";
     private int karma = 0;
+    private int id;
     private string resultMsg = "";
     private string color = "";
     
@@ -49,7 +50,7 @@
 
         try
         {
-            await _userService.Create(new UserCreationDto(username, password, email, karma ));
+            await _userService.Create(new UserCreationDto(username, password, email, karma, id ));
             username = "";
             resultMsg = "User created!";
             color = "green";

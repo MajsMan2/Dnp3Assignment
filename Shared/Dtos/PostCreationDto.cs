@@ -6,6 +6,7 @@ public class PostCreationDto
     public string Title { get; }
     public string NewText { get; }
     public int Karma { get; }
+    
     public Vote Votetype{ get; }
 
     public PostCreationDto(int ownerId, string title, string newText)

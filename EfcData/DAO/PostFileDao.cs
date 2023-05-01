@@ -1,4 +1,6 @@
 using Application.DAOInterfaces;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Shared.Dtos;
 using Shared.Models;
 
@@ -13,76 +15,58 @@ public class PostFileDao : IPostDao
         this.context = context;
     }
 
-    public Task<Post> CreateAsync(Post post)
+    public async Task<Post> CreateAsync(Post post)
     {
-        int id = 1;
-        if (context.Posts.Any())
-        {
-            id = context.Posts.Max(t => t.Id);
-            id++;
-        }
-
-        post.Id = id;
-        
-        context.Posts.Add(post);
-        context.SaveChanges();
-
-        return Task.FromResult(post);
+        EntityEntry<Post> added = await context.Posts.AddAsync(post);
+        await context.SaveChangesAsync();
+        return added.Entity;
     }
-    public Task<IEnumerable<Post>> GetAsync(SearchPostParametersDto searchParams)
+    public async Task<IEnumerable<Post>> GetAsync(SearchPostParametersDto searchParams)
     {
-        IEnumerable<Post> result = context.Posts.AsEnumerable();
-
-        if (!string.IsNullOrEmpty(searchParams.Username))
+        IQueryable<Post> query = context.Posts.Include(post => post.Owner).AsQueryable();
+    
+        if (!string.IsNullOrEmpty(searchParams.UserName))
         {
-            result = context.Posts.Where(post =>
-                post.Owner.UserName.Equals(searchParams.Username, StringComparison.OrdinalIgnoreCase));
-            
+            query = query.Where(todo =>
+                todo.Owner.UserName.ToLower().Equals(searchParams.UserName.ToLower()));
         }
-
+    
         if (searchParams.UserId != null)
         {
-            result = result.Where(t => t.Owner.Id == searchParams.UserId);
-        }
-        if (!string.IsNullOrEmpty(searchParams.TitleContains))
-        {
-            result = result.Where(t =>
-                t.Title.Contains(searchParams.TitleContains, StringComparison.OrdinalIgnoreCase));
+            query = query.Where(t => t.Owner.Id == searchParams.UserId);
         }
 
-        return Task.FromResult(result);
+        if (!string.IsNullOrEmpty(searchParams.TitleContains))
+        {
+            query = query.Where(t =>
+                t.Title.ToLower().Contains(searchParams.TitleContains.ToLower()));
+        }
+
+        List<Post> result = await query.ToListAsync();
+        return result;
     }
-    public Task<Post?> GetByIdAsync(int postId)
+    public async Task<Post?> GetByIdAsync(int postId)
     {
-        Post? existing = context.Posts.FirstOrDefault(t => t.Id == postId);
-        return Task.FromResult(existing);
+        Post? found = await context.Posts
+            .AsNoTracking()
+            .Include(post => post.Owner)
+            .SingleOrDefaultAsync(post => post.Id == postId);
+        return found;
     }
-    public Task UpdateAsync(Post toUpdate)
+    public async Task UpdateAsync(Post toUpdate)
     {
-        Post? existing = context.Posts.FirstOrDefault(post => post.Id == toUpdate.Id);
+        context.Posts.Update(toUpdate);
+        await context.SaveChangesAsync();
+    }
+    public async Task DeleteAsync(int id)
+    {
+        Post? existing = await GetByIdAsync(id);
         if (existing == null)
         {
-            throw new Exception($"Post with id {toUpdate.Id} does not exist!");
+            throw new Exception($"Todo with id {id} not found");
         }
 
         context.Posts.Remove(existing);
-        context.Posts.Add(toUpdate);
-    
-        context.SaveChanges();
-    
-        return Task.CompletedTask;
-    }
-    public Task DeleteAsync(int id)
-    {
-        Post? existing = context.Posts.FirstOrDefault(post => post.Id == id);
-        if (existing == null)
-        {
-            throw new Exception($"Post with id {id} does not exist!");
-        }
-
-        context.Posts.Remove(existing); 
-        context.SaveChanges();
-    
-        return Task.CompletedTask;
+        await context.SaveChangesAsync();
     }
 }

@@ -26,7 +26,7 @@ public class PostHttpClient : IPostService
         }
     }
 
-    public async Task<ICollection<Post>> GetAsync(string? userName, int? userId, bool? completedStatus, string? titleContains, string? textContains)
+    public async Task<ICollection<Post>> GetAsync(string? userName, int? userId, string? newText, string? titleContains, string? textContains)
     {
         string query = ConstructQuery(userName, userId, titleContains, textContains);
 

@@ -1,4 +1,6 @@
 using Application.DAOInterfaces;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Shared.Dtos;
 using Shared.Models;
 
@@ -13,21 +15,11 @@ public class UserFileDao : IUserDao
         this.context = context;
     }
     
-    public Task<User> CreateAsync(User user)
+    public async Task<User> CreateAsync(User user)
     {
-        int userId = 1;
-        if (context.Users.Any())
-        {
-            userId = context.Users.Max(u => u.Id);
-            userId++;
-        }
-
-        user.Id = userId;
-
-        context.Users.Add(user);
-        context.SaveChanges();
-
-        return Task.FromResult(user);
+        EntityEntry<User> added = await context.Users.AddAsync(user);
+        await context.SaveChangesAsync();
+        return added.Entity;
     }
 
     public Task<User?> GetByUsernameAsync(string userName)
@@ -37,22 +29,21 @@ public class UserFileDao : IUserDao
         );
         return Task.FromResult(existing);
     }
-    public Task<IEnumerable<User>> GetAsync(SearchUserParametersDto searchParameters)
+    public async Task<IEnumerable<User>> GetAsync(SearchUserParametersDto searchParameters)
     {
-        IEnumerable<User> users = context.Users.AsEnumerable();
+        IQueryable<User> usersQuery = context.Users.AsQueryable();
         if (searchParameters.UsernameContains != null)
         {
-            users = context.Users.Where(u => u.UserName.Contains(searchParameters.UsernameContains, StringComparison.OrdinalIgnoreCase));
+            usersQuery = usersQuery.Where(u => u.UserName.ToLower().Contains(searchParameters.UsernameContains.ToLower()));
         }
 
-        return Task.FromResult(users);
+        IEnumerable<User> result = await usersQuery.ToListAsync();
+        return result;
     }
 
-    public Task<User?> GetByIdAsync(int id)
+    public async Task<User?> GetByIdAsync(int id)
     {
-        User? existing = context.Users.FirstOrDefault(u =>
-            u.Id == id
-        );
-        return Task.FromResult(existing);
+        User? user = await context.Users.FindAsync(id);
+        return user;
     }
 }

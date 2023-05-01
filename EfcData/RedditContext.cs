@@ -5,7 +5,7 @@ namespace FileData;
 
 public class RedditContext : DbContext
 {
-    public DbSet<Post> Posts { get; set; }
+        public DbSet<Post> Posts { get; set; }
         
         public DbSet<User> Users { get; set; }
 
