@@ -6,11 +6,11 @@ using Shared.Models;
 
 namespace FileData.DAO;
 
-public class PostFileDao : IPostDao
+public class PostEfcDao : IPostDao
 {
     private readonly RedditContext context;
 
-    public PostFileDao(RedditContext context)
+    public PostEfcDao(RedditContext context)
     {
         this.context = context;
     }
@@ -45,10 +45,9 @@ public class PostFileDao : IPostDao
         List<Post> result = await query.ToListAsync();
         return result;
     }
-    public async Task<Post?> GetByIdAsync(int postId)
+    public async Task<Post> GetByIdAsync(int postId)
     {
         Post? found = await context.Posts
-            .AsNoTracking()
             .Include(post => post.Owner)
             .SingleOrDefaultAsync(post => post.Id == postId);
         return found;
@@ -63,7 +62,7 @@ public class PostFileDao : IPostDao
         Post? existing = await GetByIdAsync(id);
         if (existing == null)
         {
-            throw new Exception($"Todo with id {id} not found");
+            throw new Exception($"Post with id {id} not found");
         }
 
         context.Posts.Remove(existing);

@@ -6,28 +6,28 @@ using Shared.Models;
 
 namespace FileData.DAO;
 
-public class UserFileDao : IUserDao
+public class UserEfcDao : IUserDao
 {
     private readonly RedditContext context;
 
-    public UserFileDao(RedditContext context)
+    public UserEfcDao(RedditContext context)
     {
         this.context = context;
     }
     
     public async Task<User> CreateAsync(User user)
     {
-        EntityEntry<User> added = await context.Users.AddAsync(user);
+        EntityEntry<User> newUser = await context.Users.AddAsync(user);
         await context.SaveChangesAsync();
-        return added.Entity;
+        return newUser.Entity;
     }
 
-    public Task<User?> GetByUsernameAsync(string userName)
+    public async Task<User?> GetByUsernameAsync(string userName)
     {
-        User? existing = context.Users.FirstOrDefault(u =>
-            u.UserName.Equals(userName, StringComparison.OrdinalIgnoreCase)
+        User? existing = await context.Users.FirstOrDefaultAsync(u =>
+            u.UserName.ToLower().Equals(userName.ToLower())
         );
-        return Task.FromResult(existing);
+        return existing;
     }
     public async Task<IEnumerable<User>> GetAsync(SearchUserParametersDto searchParameters)
     {
