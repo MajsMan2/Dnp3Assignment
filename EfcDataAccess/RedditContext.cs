@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Shared.Models;
 
-namespace FileData;
+namespace EfcDataAccess;
 
 public class RedditContext : DbContext
 {
@@ -11,7 +11,7 @@ public class RedditContext : DbContext
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite("Data Source = database.db");
+            optionsBuilder.UseSqlite(@"Data Source = C:\Users\Marius\RiderProjects\Dnp3Assignment\EfcDataAccess\database.db");
         }
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)

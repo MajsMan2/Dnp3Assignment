@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Shared.Dtos;
 using Shared.Models;
 
-namespace FileData.DAO;
+namespace EfcDataAccess.DAO;
 
 public class PostEfcDao : IPostDao
 {
