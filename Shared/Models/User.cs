@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 
 namespace Shared.Models;
 public class User
@@ -13,6 +12,6 @@ public class User
     [Key]
     public int Id { get; set; }
     
-    [JsonIgnore]
-    public ICollection<Post> Posts { get; set; }
+   // [JsonIgnore]
+   // public ICollection<Post> Posts { get; set; }
 }

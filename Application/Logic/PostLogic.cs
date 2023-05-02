@@ -3,7 +3,6 @@ using Application.LogicInterfaces;
 using Shared.Dtos;
 using Shared.Models;
 
-
 namespace Application.Logic
 {
     public class PostLogic : IPostLogic
@@ -25,8 +24,9 @@ namespace Application.Logic
                 throw new Exception($"User with id {dto.OwnerId} was not found.");
             }
 
+            Post post = new Post(user, dto.Title, dto.NewText);
+            
             ValidatePost(dto);
-            Post post = new Post(user, dto.Title, dto.NewText, dto.Karma);
             Post created = await postDao.CreateAsync(post);
             return created;
         }
@@ -62,10 +62,12 @@ namespace Application.Logic
             User userToUse = user ?? existing.Owner;
             string titleToUse = dto.Title ?? existing.Title;
             string newTextToUse = dto.NewText ?? existing.NewText;
-            int karmaToUse = dto.Karma;
+            bool completedToUse = dto.IsCompleted ?? existing.IsCompleted;
 
-            Post updated = new (userToUse, titleToUse, newTextToUse, karmaToUse)
+
+            Post updated = new (userToUse, titleToUse, newTextToUse)
             {
+                IsCompleted = completedToUse,
                 Id = existing.Id,
             };
 

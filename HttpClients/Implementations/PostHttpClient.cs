@@ -18,7 +18,7 @@ public class PostHttpClient : IPostService
 
     public async Task CreateAsync(PostCreationDto dto)
     {
-        HttpResponseMessage response = await client.PostAsJsonAsync("/Posts", dto);
+        HttpResponseMessage response = await client.PostAsJsonAsync("/Post", dto);
         if (!response.IsSuccessStatusCode)
         {
             string content = await response.Content.ReadAsStringAsync();
@@ -26,11 +26,10 @@ public class PostHttpClient : IPostService
         }
     }
 
-    public async Task<ICollection<Post>> GetAsync(string? userName, int? userId, string? newText, string? titleContains, string? textContains)
+    public async Task<ICollection<Post>> GetAsync(string? userName, int? userId, string? titleContains, string? textContains, bool? completedStatus)
     {
-        string query = ConstructQuery(userName, userId, titleContains, textContains);
-
-        HttpResponseMessage response = await client.GetAsync("/Posts" + query);
+        string query = ConstructQuery(userName, userId, titleContains, textContains, completedStatus);
+        HttpResponseMessage response = await client.GetAsync("/Post" + query);
         string content = await response.Content.ReadAsStringAsync();
         if (!response.IsSuccessStatusCode)
         {
@@ -82,7 +81,7 @@ public class PostHttpClient : IPostService
         }
     }
 
-    private static string ConstructQuery(string? userName, int? userId, string? titleContains, string? textContains)
+    private static string ConstructQuery(string? userName, int? userId, string? titleContains, string? textContains, bool? completedStatus)
     {
         string query = "";
         if (!string.IsNullOrEmpty(userName))
@@ -101,12 +100,19 @@ public class PostHttpClient : IPostService
             query += string.IsNullOrEmpty(query) ? "?" : "&";
             query += $"titlecontains={titleContains}";
         }
-        
+
         if (!string.IsNullOrEmpty(textContains))
         {
             query += string.IsNullOrEmpty(query) ? "?" : "&";
             query += $"textContains={textContains}";
         }
+        
+        if (completedStatus != null)
+        {
+            query += string.IsNullOrEmpty(query) ? "?" : "&";
+            query += $"completedstatus={completedStatus}";
+        }
+        
         return query;
     }
 }

@@ -33,10 +33,10 @@ public class UserHttpClient : IUserService
     
     public async Task<IEnumerable<User>> GetUsers(string? usernameContains = null)
     {
-        string uri = "/users";
+        string uri = "/user";
         if (!string.IsNullOrEmpty(usernameContains))
         {
-            uri += $"?username={usernameContains}";
+            uri += $"?UserName={usernameContains}";
         }
         HttpResponseMessage response = await client.GetAsync(uri);
         string result = await response.Content.ReadAsStringAsync();

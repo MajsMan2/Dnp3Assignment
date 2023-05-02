@@ -1,44 +1,160 @@
 ﻿@page "/ViewPosts"
-@using Client.Services.PostService
-@inject IPostServices PostService 
-@inject NavigationManager NavMan
+@using global::Shared.Models
+@using HttpClients.ClientInterfaces
+@using global::Shared.Dtos
+@inject IPostService postService
+@inject NavigationManager navMgr
 
 <h3>Posts</h3>
+<div class="filter-bar">
+    <div class="filters-container">
+        <img src="icons/@(doShowFilters ? "clear_" : "")funnel.png" class="funnel" @onclick="@(() => doShowFilters = !doShowFilters)" alt="Funnel"/>
+        @if (doShowFilters)
+        {
+            <div class="filter">
+                <label>Username:</label>
+                <input type="text" @bind="usernameFilter"/>
+            </div>
+            <div class="filter">
+                <label>User id:</label>
+                <input type="number" @bind="userIdFilter"/>
+            </div>
+            <div class="filter">
+                <label>Is completed?</label>
+                <select @bind="completedStatusFilter">
+                    <option value="all">All</option>
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
+                </select>
+            </div>
+            <div class="filter">
+                <label>Title contains:</label>
+                <input type="text" @bind="titleContainsFilter"/>
+            </div>
+        }
+    </div>
+</div>
 
-<table class=table>
-    <thead>
-    <tr>
-        <th>Title</th>
-        <th>Text</th>
-        <th>Id</th>
-    </tr>
-    </thead>
-    <tbody>
-    @foreach (var post in PostService.Posts)
-    {
+<div>
+    <button @onclick="LoadPosts">Load</button>
+</div>
+
+@if (posts == null)
+{
+}
+else if (!posts.Any())
+{
+    <p>No posts to display</p>
+}
+else
+{
+    <table class="table">
+        <thead>
         <tr>
-            <td>@post.Title</td>
-            <td>@post.NewText</td>
-            <td>@post.Id</td>
-            <td>
-                <button class="bt btn-primary"
-                        @OnClick="(()=> ShowPost(post.Id))">
-                    <i class="oi oi-pencil"></i>
-                    </button>
-            </td>
+            <th>Todo ID</th>
+            <th>Owner ID</th>
+            <th>Title</th>
+            <th>Text</th>
+            <th>Completed?</th>
+            <th>Edit</th>
+            <th>Delete?</th>
         </tr>
-    }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+        @foreach (var item in posts)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.Owner.UserName</td>
+                <td>@item.Title</td>
+                <td>@item.NewText</td>
+                <td>
+                    <FancyCheckBox 
+                        IsCompleted="@item.IsCompleted" 
+                        OnChange="@((bool status) => CompletePost(item, status))"
+                        />         
+
+                </td>
+                <td>
+                    <img src="icons/edit.gif" class="funnel" @onclick="@(() => navMgr.NavigateTo($"/EditPost/{item.Id}"))"/>
+                    </td>
+                <td>
+                    <label @onclick="@(() => RemovePost(item.Id))" style="cursor:pointer; color: red; font-weight: bold">
+                        &#x2717;
+                    </label>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+@if (!string.IsNullOrEmpty(msg))
+{
+    <label style="color: red">@msg</label>
+}
 
 @code {
-    protected override async Task OnInitializedAsync()
+    private IEnumerable<Post>? posts;
+    private string msg = "";
+    private bool doShowFilters = false;
+    
+    private string? usernameFilter;
+    private int? userIdFilter;
+    private string? completedStatusFilter;
+    private string? titleContainsFilter;
+    private string? textContainsFilter;
+
+
+    private async Task LoadPosts()
     {
-        await PostService.GetPost();
+        try
+        {
+            bool? completedFilterValue = null;
+            if (!string.IsNullOrEmpty(completedStatusFilter) && !completedStatusFilter.Equals("all"))
+            {
+                completedFilterValue = bool.Parse(completedStatusFilter);
+            }
+            posts = await postService.GetAsync(usernameFilter, userIdFilter, titleContainsFilter, textContainsFilter, completedFilterValue);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+        }
     }
 
-    void ShowPost(int id)
+    private async Task CompletePost(Post item, bool status)
     {
-        NavMan.NavigateTo($"posts/{id}");
+        PostUpdateDto dto = new(item.Id)
+        {
+            IsCompleted = status
+        };
+        try
+        {
+            await postService.UpdateAsync(dto);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+        }
+    }
+
+    private async Task RemovePost(int postId)
+    {
+        msg = "";
+        try
+        {
+            await postService.DeleteAsync(postId);
+            
+            var list = new List<Post>(posts!);
+            list.RemoveAll(post => post.Id == postId);
+            posts = list.AsEnumerable();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+        }
     }
 }

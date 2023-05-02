@@ -10,6 +10,7 @@ public class PostUpdateDto
     
     public int Karma { get; set; }
     
+    public bool? IsCompleted { get; set; }
 
     public PostUpdateDto(int id)
     {

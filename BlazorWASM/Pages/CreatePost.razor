@@ -2,6 +2,7 @@
 @using HttpClients.ClientInterfaces
 @using global::Shared.Models
 @using global::Shared.Dtos
+@using Client.Pages.UIComponents;
 @inject IUserService userService
 @inject IPostService postService
 @inject NavigationManager navMgr
@@ -46,22 +47,27 @@
     }
 </div>
 
+<Modal ShowModal="showModal">
+    <p>You have successfully added a new post!</p>
+    <button @onclick="@Proceed">Go to sub</button>
+</Modal>
+
 @code {
-    private IList<User> users;
+    private IEnumerable<User>? users;
     private int? selectedUserId;
     private string postTitle = "";
     private string newText = "";
 
     private string msg = "";
 
-    private bool? showModal;
+    private bool showModal;
 
     protected override async Task OnInitializedAsync()
     {
         msg = "";
         try
         {
-            users = (IList<User>) await userService.GetUsers();
+            users = await userService.GetUsers();
         }
         catch (Exception e)
         {
@@ -75,12 +81,17 @@
         msg = "";
         if (selectedUserId == null)
         {
-            msg = "You must select an assignee!";
+            msg = "You must select a user!";
             return;
         }
         if (string.IsNullOrEmpty(postTitle))
         {
             msg = "Title cannot be empty!";
+            return;
+        }
+        if (string.IsNullOrEmpty(newText))
+        {
+            msg = "Text cannot be empty!";
             return;
         }
 

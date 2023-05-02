@@ -27,13 +27,12 @@ public class PostEfcDao : IPostDao
     
         if (!string.IsNullOrEmpty(searchParams.UserName))
         {
-            query = query.Where(todo =>
-                todo.Owner.UserName.ToLower().Equals(searchParams.UserName.ToLower()));
+            query = query.Where(post =>
+                post.Owner.UserName.ToLower().Equals(searchParams.UserName.ToLower()));
         }
-    
         if (searchParams.UserId != null)
         {
-            query = query.Where(t => t.Owner.Id == searchParams.UserId);
+            query = query.Where(p => p.Owner.Id == searchParams.UserId);
         }
 
         if (!string.IsNullOrEmpty(searchParams.TitleContains))
@@ -41,11 +40,16 @@ public class PostEfcDao : IPostDao
             query = query.Where(t =>
                 t.Title.ToLower().Contains(searchParams.TitleContains.ToLower()));
         }
+        if (!string.IsNullOrEmpty(searchParams.TextContains))
+        {
+            query = query.Where(t =>
+                t.Title.ToLower().Contains(searchParams.TextContains.ToLower()));
+        }
 
         List<Post> result = await query.ToListAsync();
         return result;
     }
-    public async Task<Post> GetByIdAsync(int postId)
+    public async Task<Post?> GetByIdAsync(int postId)
     {
         Post? found = await context.Posts
             .Include(post => post.Owner)

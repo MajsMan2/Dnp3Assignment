@@ -7,11 +7,11 @@ namespace WebAPI.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class PostsController : ControllerBase
+public class PostController : ControllerBase
 {
     private readonly IPostLogic postLogic;
 
-    public PostsController(IPostLogic postLogic)
+    public PostController(IPostLogic postLogic)
     {
         this.postLogic = postLogic;
     }
@@ -22,7 +22,7 @@ public class PostsController : ControllerBase
         try
         {
             Post created = await postLogic.CreateAsync(dto);
-            return Created($"/posts/{created.Id}", created);
+            return Created($"/post/{created.Id}", created);
         }
         catch (Exception e)
         {
