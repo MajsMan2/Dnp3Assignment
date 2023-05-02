@@ -2,8 +2,15 @@
 @using HttpClients.ClientInterfaces
 @using global::Shared.Dtos
 @inject IUserService _userService;
+@inject NavigationManager navMgr
+@using Client.Pages.UIComponents;
 
-<h3>CreateUser</h3>
+
+<div>
+    <img src="icons/redditlogo.png" alt="RLogo" style="width:2em; height:2em; margin-bottom: 20px"/>
+</div>
+
+<h3>Create User</h3>
 
 <div class="card">
     <div class="form-group field">
@@ -22,18 +29,23 @@
             <label style="color: @color">@resultMsg</label>
         }
     </div>
-     <div class="form-group field">
-                <label>Email:</label>
-                <input type="text" @bind="email" @bind:event="oninput"/>
-                @if (!string.IsNullOrEmpty(resultMsg))
-                {
-                    <label style="color: @color">@resultMsg</label>
-                }
-            </div>
+    <div class="form-group field">
+        <label>Email:</label>
+        <input type="text" @bind="email" @bind:event="oninput"/>
+        @if (!string.IsNullOrEmpty(resultMsg))
+        {
+            <label style="color: @color">@resultMsg</label>
+        }
+    </div>
     <div class="button-row">
         <button @onclick="Create" disabled="@(string.IsNullOrEmpty(username))" class="acceptbtn">Create</button>
     </div>
 </div>
+
+<Modal ShowModal="showModal">
+    <p>Welcome to Reddit!</p>
+    <button @onclick="@Proceed">Make your first post</button>
+</Modal>
 
 @code {
     private string username = "";
@@ -44,6 +56,8 @@
     private string resultMsg = "";
     private string color = "";
     
+    private bool showModal;
+
     private async Task Create()
     {
         resultMsg = "";
@@ -61,5 +75,11 @@
             resultMsg = e.Message;
             color = "red";
         }
+    }
+    
+    private void Proceed()
+    {
+        showModal = false;
+        navMgr.NavigateTo("/CreatePost");
     }
 }

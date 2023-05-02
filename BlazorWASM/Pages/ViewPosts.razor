@@ -4,11 +4,20 @@
 @using global::Shared.Dtos
 @inject IPostService postService
 @inject NavigationManager navMgr
+@using Client.Pages.UIComponents;
 
-<h3>Posts</h3>
+
+<div>
+    <img src="icons/redditlogo.png" alt="RLogo" style="width:2em; height:2em; margin-bottom: 20px"/>
+</div>
+
+
+<h3>Welcome to the Potato Sub</h3>
+
+
 <div class="filter-bar">
     <div class="filters-container">
-        <img src="icons/@(doShowFilters ? "clear_" : "")funnel.png" class="funnel" @onclick="@(() => doShowFilters = !doShowFilters)" alt="Funnel"/>
+        <img src="icons/@(doShowFilters ? "clear_" : "")si.jpg" class="funnel" @onclick="@(() => doShowFilters = !doShowFilters)" alt="si" style="width:8em; height:8em;"/>
         @if (doShowFilters)
         {
             <div class="filter">
@@ -35,7 +44,7 @@
     </div>
 </div>
 
-<div>
+<div> 
     <button @onclick="LoadPosts">Load</button>
 </div>
 
@@ -93,6 +102,10 @@ else
     <label style="color: red">@msg</label>
 }
 
+<div>
+    <button @onclick="@MorePosts">Create more posts!</button>
+</div>
+
 @code {
     private IEnumerable<Post>? posts;
     private string msg = "";
@@ -103,8 +116,7 @@ else
     private string? completedStatusFilter;
     private string? titleContainsFilter;
     private string? textContainsFilter;
-
-
+    
     private async Task LoadPosts()
     {
         try
@@ -156,5 +168,10 @@ else
             Console.WriteLine(e);
             msg = e.Message;
         }
+    }
+    
+    private void MorePosts()
+    {
+        navMgr.NavigateTo("/CreatePost");
     }
 }
